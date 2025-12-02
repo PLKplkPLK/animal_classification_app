@@ -1,19 +1,18 @@
 import ast
 import json
-from shutil import ExecError
 import sys
 import os
 import io
+import gc
+from shutil import ExecError
 from datetime import datetime
 from pathlib import Path
 from contextlib import contextmanager
 
 import pandas as pd
 import torch
+from tqdm import tqdm
 from PIL import Image
-from megadetector.detection.run_detector_batch import load_and_run_detector_batch
-
-from helpers import Deepfaune, crop_normalized_bbox_square, predict_batch, class_names
 
 
 @contextmanager
@@ -36,6 +35,14 @@ def capture_stdout():
     finally:
         sys.stdout = old_stdout
 
+
+
+with suppress_stdout() as detector_output:
+    from megadetector.detection.run_detector_batch import load_and_run_detector_batch
+    from helpers import Deepfaune, crop_normalized_bbox_square, predict_batch, class_names
+
+
+
 def run_megadetector(images_directory: str, BATCH_SIZE_MD: int, N_CORES: int):
     # images
     image_extensions = {'.jpg', '.jpeg', '.png', '.gif', '.bmp', '.tiff', '.webp'}
@@ -51,7 +58,7 @@ def run_megadetector(images_directory: str, BATCH_SIZE_MD: int, N_CORES: int):
 
     output_text = detector_output.getvalue()
     if "CUDA out of memory" in output_text:
-        raise ExecError("Lower batch size. Your GPU doesn't have this much memory.")
+        raise ExecError("Lower detector batch size. Your GPU doesn't have this much memory.")
 
     # save output
     images_paths_sec, categories, confs, bboxes, n_animals = [], [], [], [], []
@@ -78,6 +85,7 @@ def run_megadetector(images_directory: str, BATCH_SIZE_MD: int, N_CORES: int):
     with open('megadetector_raw_results.json', 'w') as output_file:
         json.dump(results, output_file, indent=4)
 
+    gc.collect()
     torch.cuda.empty_cache()
     torch.cuda.ipc_collect()
 
@@ -86,24 +94,22 @@ def run_pipeline(BATCH_SIZE: int):
     checkpoint_path = 'model/deepfaune_polish_lr4_checkpoint.pt' # user input in advanced?
 
     # classifier model
-    model_wrapper = Deepfaune(checkpoint_path)
+    with suppress_stdout() as detector_output:
+        model_wrapper = Deepfaune(checkpoint_path)
     classifier = model_wrapper.model.base_model
     classifier.to('cuda')
     transforms = model_wrapper.transforms
 
     images = pd.read_csv('megadetector_results.csv', index_col=0)
-    total=len(images)
+    
     images['bbox'] = images["bbox"].apply(
         lambda b: ast.literal_eval(b) if isinstance(b, str) else None)
 
     batch = []
     paths = []
     results = pd.DataFrame({'image': [], 'detected_animal': [], 'confidence': []})
-    ith_image = 0
 
-    for _, row in images.iterrows():
-        ith_image += 1
-        print(f'{100*ith_image/total:.1f}%: {ith_image} / {total}', end='\r')
+    for _, row in tqdm(images.iterrows(), total=len(images)):
         image_path = row['image_path']
 
         # only animals
@@ -150,3 +156,29 @@ def run_pipeline(BATCH_SIZE: int):
 
     now = datetime.now().strftime('%Y_%m_%d_%H_%M')
     results.to_csv(f'results_{now}.csv')
+
+    # --- GPU cleanup: move model to CPU, delete references, collect garbage ---
+    try:
+        # classifier was moved to cuda earlier; move it back to free GPU memory
+        classifier.to('cpu')
+    except Exception:
+        pass
+
+    try:
+        # remove references to model objects
+        del classifier
+    except Exception:
+        pass
+
+    try:
+        del model_wrapper
+    except Exception:
+        pass
+
+    # Force python GC and release CUDA cache
+    gc.collect()
+    try:
+        torch.cuda.empty_cache()
+        torch.cuda.ipc_collect()
+    except Exception:
+        pass

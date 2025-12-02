@@ -91,7 +91,7 @@ def run_megadetector(images_directory: str, BATCH_SIZE_MD: int, N_CORES: int):
 
 
 def run_pipeline(BATCH_SIZE: int):
-    checkpoint_path = 'model/deepfaune_polish_lr4_checkpoint.pt' # user input in advanced?
+    checkpoint_path = os.path.join('model', 'deepfaune_polish_lr4_checkpoint.pt')
 
     # classifier model
     with suppress_stdout() as detector_output:

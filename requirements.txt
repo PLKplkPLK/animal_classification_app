@@ -1,0 +1,9 @@
+pandas
+numpy
+
+timm
+torch
+torchvision
+megadetector
+
+pillow

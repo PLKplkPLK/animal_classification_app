@@ -1,5 +1,7 @@
 # My ignore files:
 *.pt
+megadetector_*
+results_*.csv
 
 
 # Byte-compiled / optimized / DLL files

@@ -2,6 +2,7 @@ import os
 import sys
 import threading
 import gc
+import certifi
 from shutil import ExecError
 
 import torch
@@ -78,6 +79,7 @@ def run():
     threading.Thread(target=task).start()
 
 # -------- App --------
+os.environ['SSL_CERT_FILE'] = certifi.where()
 root = tk.Tk()
 root.title("Image Classifier")
 root.geometry("500x330")

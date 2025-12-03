@@ -1,3 +1,4 @@
+import os
 import sys
 import threading
 import gc
@@ -6,6 +7,7 @@ from shutil import ExecError
 import torch
 import tkinter as tk
 from tkinter import filedialog, messagebox
+from PIL import Image, ImageTk, ImageOps
 
 from pipeline import run_megadetector, run_pipeline
 
@@ -80,18 +82,26 @@ root = tk.Tk()
 root.title("Image Classifier")
 root.geometry("500x330")
 
+bg_img = Image.open(os.path.join('etc', 'bg.jpg'))
+bg_img = ImageOps.contain(bg_img, (600, 400))
+# bg_img = bg_img.resize((600, 330))
+bg = ImageTk.PhotoImage(bg_img)
+label_bg = tk.Label(root, image=bg)
+label_bg.place(x=0, y=0, relwidth=1, relheight=1)
+
+
 # GPU / CPU Status
 device = "GPU" if torch.cuda.is_available() else "CPU"
-tk.Label(root, text=f"Running on: {device}", fg="green").pack(pady=5)
+tk.Label(root, text=f"Running on: {device}", fg="green", bg="white").pack(pady=5)
 
 # Folder selection
 folder_path = tk.StringVar()
-tk.Label(root, text="Image Directory").pack()
-tk.Entry(root, textvariable=folder_path, width=60).pack()
-tk.Button(root, text="Browse", command=select_folder).pack(pady=5)
+tk.Label(root, text="Image Directory", bg="white").pack()
+tk.Entry(root, textvariable=folder_path, width=60, bg="white").pack()
+tk.Button(root, text="Browse", command=select_folder, bg="white").pack(pady=5)
 
 # Parameters
-params_frame = tk.Frame(root)
+params_frame = tk.Frame(root, bg="white")
 params_frame.pack(pady=10)
 
 batch_size_var_md = tk.StringVar(value="10")
@@ -99,20 +109,20 @@ batch_size_var_df = tk.StringVar(value="10")
 workers_var = tk.StringVar(value="1")
 
 if device == "GPU":
-    tk.Label(params_frame, text="Batch size detector:").grid(row=0, column=0)
-    tk.Entry(params_frame, textvariable=batch_size_var_md, width=6).grid(row=0, column=1, padx=10)
-    tk.Label(params_frame, text="Batch size classifier:").grid(row=0, column=3)
-    tk.Entry(params_frame, textvariable=batch_size_var_df, width=6).grid(row=0, column=4, padx=10)
+    tk.Label(params_frame, text="Batch size detector:", bg="white").grid(row=0, column=0)
+    tk.Entry(params_frame, textvariable=batch_size_var_md, width=6, bg="white").grid(row=0, column=1, padx=10)
+    tk.Label(params_frame, text="Batch size classifier:", bg="white").grid(row=0, column=3)
+    tk.Entry(params_frame, textvariable=batch_size_var_df, width=6, bg="white").grid(row=0, column=4, padx=10)
 else:
     tk.Label(params_frame, text="CPU workers:").grid(row=0, column=2)
     tk.Entry(params_frame, textvariable=workers_var, width=6).grid(row=0, column=3)
 
 # Run button
-tk.Button(root, text="Run Classification", command=run).pack(pady=10)
+tk.Button(root, text="Run Classification", command=run, bg="white").pack(pady=10)
 
-tk.Label(root, text="Currently:").pack()
+tk.Label(root, text="Currently:", bg="white").pack()
 status_var = tk.StringVar(value="waiting for your folder and classificaion start")
-tk.Label(root, textvariable=status_var).pack()
+tk.Label(root, textvariable=status_var, bg="white").pack()
 
 # Output console
 output = tk.Text(root, height=1)

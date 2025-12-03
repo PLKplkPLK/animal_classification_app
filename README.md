@@ -4,7 +4,7 @@
 Animal image classification app using a fine-tuned 
 <a href="https://www.deepfaune.cnrs.fr/en/">DeepFaune model</a> 
 for Polish species.<br>
-Article describing the fine-tuning is in progress.
+<a href="https://github.com/PLKplkPLK/mgr">Repository with fine-tuning details.</a>
 </p>
 
 <p align="center">
@@ -13,15 +13,15 @@ Article describing the fine-tuning is in progress.
 
 
 
-<h5 align="center">Installation</h5>
+<h4 align="center">Installation</h4>
 
 <p align="center">
-You can download the app package from <a href="...">here</a>.
+You can download the app package from <a href="https://aghedupl-my.sharepoint.com/:f:/g/personal/kacpermuller_student_agh_edu_pl/Ek2BgRCr40tBnyK3etFUkgkBn-vb-wvwuN-_nWL9k4sBXw?e=hEAbSG">here</a>.
 </p>
 
 
 
-<h5 align="center">Usage</h5>
+<h4 align="center">Usage</h4>
 
 <p>
 After opening the app (classifox executable in app's directory), insert path to the directory with images to classify by clicking "Browse" button and click "Run classification" in order to start process.

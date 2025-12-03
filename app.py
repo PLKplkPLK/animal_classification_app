@@ -75,6 +75,7 @@ def run():
             torch.cuda.empty_cache()
             torch.cuda.ipc_collect()
             output.delete("1.0", tk.END)
+            status_var.set("Done")
 
     threading.Thread(target=task).start()
 
@@ -94,7 +95,7 @@ label_bg.place(x=0, y=0, relwidth=1, relheight=1)
 
 # GPU / CPU Status
 device = "GPU" if torch.cuda.is_available() else "CPU"
-tk.Label(root, text=f"Running on: {device}", fg="green", bg="white").pack(pady=5)
+tk.Label(root, text=f"Running on {device}", fg="green", bg="white").pack(pady=5)
 
 # Folder selection
 folder_path = tk.StringVar()

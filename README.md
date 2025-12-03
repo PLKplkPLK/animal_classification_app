@@ -16,7 +16,7 @@ for Polish species.<br>
 <h4 align="center">Installation</h4>
 
 <p align="center">
-You can download the app package from <a href="https://aghedupl-my.sharepoint.com/:f:/g/personal/kacpermuller_student_agh_edu_pl/Ek2BgRCr40tBnyK3etFUkgkBn-vb-wvwuN-_nWL9k4sBXw?e=hEAbSG">here</a>.
+You can download the app package from <a href="https://aghedupl-my.sharepoint.com/:f:/g/personal/kacpermuller_student_agh_edu_pl/Ek2BgRCr40tBnyK3etFUkgkBn-vb-wvwuN-_nWL9k4sBXw?e=hEAbSG">here</a>. Download Linux or Windows archive, based on what operating system you are using.
 </p>
 
 

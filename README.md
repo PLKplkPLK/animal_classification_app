@@ -1,7 +1,7 @@
 <h3 align="center">Classifox – Polish species classification app</h3>
 
 <p align="center">
-Animal image classification app using a fine-tuned 
+Animal image classification app using a <a href="https://github.com/agentmorris/MegaDetector">MegaDetector</a> and a fine-tuned 
 <a href="https://www.deepfaune.cnrs.fr/en/">DeepFaune model</a> 
 for Polish species.<br>
 <a href="https://github.com/PLKplkPLK/mgr">Repository with fine-tuning details.</a>
@@ -25,6 +25,13 @@ You can download the app package from <a href="https://aghedupl-my.sharepoint.co
 
 <p>
 After opening the app (classifox executable in app's directory), insert path to the directory with images to classify by clicking "Browse" button and click "Run classification" in order to start process.
+
+After everything is finished, you should see 3 files created:
+ - `megadetector_results.csv` with detector results
+ - `megadetector_raw_results.json` with all the raw detector results
+ - `results_[date].csv` with detection results for each image
+
+<br>
 
 If using CPU:<br>
 you should set number of workers. If you have 16 core CPU, but want the PC not to freeze, workers should be set to around 12.

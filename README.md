@@ -26,6 +26,8 @@ You can download the app package from <a href="https://aghedupl-my.sharepoint.co
 <p>
 After opening the app (classifox executable in app's directory), insert path to the directory with images to classify by clicking "Browse" button and click "Run classification" in order to start process.
 
+When running it for the first time it might take some time to download the Megadetector model, so be patient when "Running detector..." is shown.
+
 After everything is finished, you should see 3 files created:
  - `megadetector_results.csv` with detector results
  - `megadetector_raw_results.json` with all the raw detector results

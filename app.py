@@ -34,10 +34,12 @@ class RedirectText:
     def flush(self):
         pass
 
+
 # -------- GUI Logic --------
 def select_folder():
     folder = filedialog.askdirectory()
     folder_path.set(folder)
+
 
 def run():
     folder = folder_path.get()
@@ -48,7 +50,6 @@ def run():
     try:
         batch_md = int(batch_size_var_md.get())
         batch_df = int(batch_size_var_df.get())
-        workers = int(workers_var.get())
     except ValueError:
         messagebox.showerror("Error", "Batch size & workers must be numbers")
         return
@@ -56,7 +57,7 @@ def run():
     def task():
         try:
             status_var.set("Running detector...")
-            run_megadetector(folder, batch_md, workers)
+            run_megadetector(folder, batch_md)
             status_var.set("Running classifier...")
             run_pipeline(batch_df)
             messagebox.showinfo("Done", "Processing complete")
@@ -69,15 +70,17 @@ def run():
                     "Lower classifier batch size. Your GPU doesn't have this much memory."
                 )
             else:
-                messagebox.showerror("Unexpected error", str(e))
+                messagebox.showerror("Unexpected error", repr(e))
         finally:
-            gc.collect()
-            torch.cuda.empty_cache()
-            torch.cuda.ipc_collect()
+            if device == "GPU":
+                gc.collect()
+                torch.cuda.empty_cache()
+                torch.cuda.ipc_collect()
             output.delete("1.0", tk.END)
             status_var.set("Done")
 
     threading.Thread(target=task).start()
+
 
 # -------- App --------
 os.environ['SSL_CERT_FILE'] = certifi.where()
@@ -96,6 +99,8 @@ label_bg.place(x=0, y=0, relwidth=1, relheight=1)
 # GPU / CPU Status
 device = "GPU" if torch.cuda.is_available() else "CPU"
 tk.Label(root, text=f"Running on {device}", fg="green", bg="white").pack(pady=5)
+if device == "CPU":
+    tk.Label(root, text="CPU is not optimal and will take long time to process photos. CUDA is recommended.", bg="white").pack(pady=5)
 
 # Folder selection
 folder_path = tk.StringVar()
@@ -109,16 +114,12 @@ params_frame.pack(pady=10)
 
 batch_size_var_md = tk.StringVar(value="10")
 batch_size_var_df = tk.StringVar(value="10")
-workers_var = tk.StringVar(value="1")
 
 if device == "GPU":
     tk.Label(params_frame, text="Batch size detector:", bg="white").grid(row=0, column=0)
     tk.Entry(params_frame, textvariable=batch_size_var_md, width=6, bg="white").grid(row=0, column=1, padx=10)
     tk.Label(params_frame, text="Batch size classifier:", bg="white").grid(row=0, column=3)
     tk.Entry(params_frame, textvariable=batch_size_var_df, width=6, bg="white").grid(row=0, column=4, padx=10)
-else:
-    tk.Label(params_frame, text="CPU workers:").grid(row=0, column=2)
-    tk.Entry(params_frame, textvariable=workers_var, width=6).grid(row=0, column=3)
 
 # Run button
 tk.Button(root, text="Run Classification", command=run, bg="white").pack(pady=10)

@@ -1,7 +1,9 @@
-# My ignore files:
+# Mine ignore files:
 *.pt
 megadetector_*
 results_*.csv
+/dist*
+venv_windows/
 
 
 # Byte-compiled / optimized / DLL files

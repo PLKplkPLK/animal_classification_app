@@ -17,6 +17,7 @@ class_names = [
 ]
 class_to_idx = {name: i for i, name in enumerate(class_names)}
 
+
 class Deepfaune:
     def __init__(self, dfvit_weights: str):
         self.model: Model = Model()
@@ -92,6 +93,7 @@ class Model(nn.Module):
             print("Can't load checkpoint model because :\n\n " + str(e))
             raise e
 
+
 def crop_normalized_bbox_square(img: Image.Image, bbox: list[float]) -> Image.Image:
     """
     img: PIL.Image opened image
@@ -133,6 +135,7 @@ def crop_normalized_bbox_square(img: Image.Image, bbox: list[float]) -> Image.Im
 
     return img.crop((new_left, new_top, new_right, new_bottom))
 
+
 def predict_batch(model, pil_images: list[Image.Image], transform: transforms.Compose,
                   class_names: list[str], top_k: int=5):
     """
@@ -140,10 +143,11 @@ def predict_batch(model, pil_images: list[Image.Image], transform: transforms.Co
     returns: list of list of (classname, prob)
     """
     model.eval()
+    device = "cuda" if torch.cuda.is_available() else "cpu"
 
     # Transform images → stack into a batch
     xs = [transform(im) for im in pil_images]  # list of tensors (3, 480, 480)
-    x = torch.stack(xs).to('cuda')                   # (B, 3, 480, 480)
+    x = torch.stack(xs).to(device)                   # (B, 3, 480, 480)
 
     with torch.no_grad():
         logits = model(x)

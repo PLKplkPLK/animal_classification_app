@@ -1,0 +1,1 @@
+pyinstaller --onedir --windowed --hidden-import=certifi --add-data "etc;etc" --add-data  "models;models" app.py

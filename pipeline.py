@@ -25,6 +25,7 @@ def suppress_stdout():
         sys.stdout.close()
         sys.stdout = old_stdout
 
+
 @contextmanager
 def capture_stdout():
     old_stdout = sys.stdout
@@ -36,14 +37,12 @@ def capture_stdout():
         sys.stdout = old_stdout
 
 
-
 with suppress_stdout() as detector_output:
     from megadetector.detection.run_detector_batch import load_and_run_detector_batch
     from helpers import Deepfaune, crop_normalized_bbox_square, predict_batch, class_names
 
 
-
-def run_megadetector(images_directory: str, BATCH_SIZE_MD: int, N_CORES: int):
+def run_megadetector(images_directory: str, BATCH_SIZE_MD: int):
     # images
     image_extensions = {'.jpg', '.jpeg', '.png', '.gif', '.bmp', '.tiff', '.webp'}
     directory = Path(images_directory)
@@ -54,7 +53,7 @@ def run_megadetector(images_directory: str, BATCH_SIZE_MD: int, N_CORES: int):
 
     # run MD
     with capture_stdout() as detector_output:
-        results = load_and_run_detector_batch("MDV5A", images_paths, confidence_threshold=0.2, batch_size=BATCH_SIZE_MD, n_cores=N_CORES)
+        results = load_and_run_detector_batch("MDV5A", images_paths, confidence_threshold=0.2, batch_size=BATCH_SIZE_MD)
 
     output_text = detector_output.getvalue()
     if "CUDA out of memory" in output_text:
@@ -85,19 +84,20 @@ def run_megadetector(images_directory: str, BATCH_SIZE_MD: int, N_CORES: int):
     with open('megadetector_raw_results.json', 'w') as output_file:
         json.dump(results, output_file, indent=4)
 
-    gc.collect()
-    torch.cuda.empty_cache()
-    torch.cuda.ipc_collect()
+    if torch.cuda.is_available():
+        gc.collect()
+        torch.cuda.empty_cache()
+        torch.cuda.ipc_collect()
 
 
 def run_pipeline(BATCH_SIZE: int):
     checkpoint_path = os.path.join('model', 'deepfaune_polish_lr4_checkpoint.pt')
 
     # classifier model
-    with suppress_stdout() as detector_output:
+    with suppress_stdout() as _:
         model_wrapper = Deepfaune(checkpoint_path)
     classifier = model_wrapper.model.base_model
-    classifier.to('cuda')
+    classifier.to('cuda' if torch.cuda.is_available() else 'cpu')
     transforms = model_wrapper.transforms
 
     images = pd.read_csv('megadetector_results.csv', index_col=0)
@@ -176,9 +176,7 @@ def run_pipeline(BATCH_SIZE: int):
         pass
 
     # Force python GC and release CUDA cache
-    gc.collect()
-    try:
+    if torch.cuda.is_available():
+        gc.collect()
         torch.cuda.empty_cache()
         torch.cuda.ipc_collect()
-    except Exception:
-        pass

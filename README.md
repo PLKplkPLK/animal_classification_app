@@ -33,10 +33,7 @@ After everything is finished, you should see 3 files created:
 
 <br>
 
-If using CPU:<br>
-you should set number of workers. If you have 16 core CPU, but want the PC not to freeze, workers should be set to around 12.
-
-If using GPU:<br>
+If using GPU (highly recommended):<br>
 you should set batch size (number of concurent images processed) for the detector and the classifier, depending on your GPU VRAM and the size of images. If you set it too high, the app will raise error, telling you that. If you set it too low, the process will take a lot of time to finish.
 
 GPU settings recommendations:
